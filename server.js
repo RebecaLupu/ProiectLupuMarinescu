@@ -32,7 +32,7 @@ const Movie = sequelize.define('movies',{
   
     title:Sequelize.STRING,
     duration:Sequelize.INTEGER,
-    year:Sequelize.INTEGER,
+    year:Sequelize.INTEGER
 })
 /*
 const RandGenuri=sequelize.define('randgenuri',{
@@ -109,7 +109,7 @@ app.get('/createdb', (request, response) => {
 
 
 
-//app.use(express.json())
+app.use(express.json())
 app.use(express.urlencoded())
 
 //definire endpoint POST /messages
@@ -479,9 +479,9 @@ app.get('/genuri/:codGen/filme', (req,res,next)=>{
 
 app.get('/users/:id/movies', async (req, res, next) => {
 	try{
-		let user = await User.findById(req.params.movieId)
+		let user = await User.findById(req.params.id)
 		if (user){
-			let movies = await User.getMovies()
+			let movies = await user.getMovies()
 			res.status(200).json(movies)
 		}
 		else{
@@ -495,9 +495,39 @@ app.get('/users/:id/movies', async (req, res, next) => {
 
 app.post('/users/:id/movies', async (req, res, next) => {
 	try{
-		let user = await User.findById(req.params.movieId)
-		let movies = await Movie.create(req.body)
-        user.addMovies(movies)
+		let user = await User.findById(req.params.id)
+		let movie = await Movie.create(req.body)
+        user.addMovies(movie)
+		res.status(200).json({message : 'created'})
+	}
+	catch(e){
+		next(e)
+	}
+})
+
+
+
+app.get('/genres/:id/movies', async (req, res, next) => {
+	try{
+		let genre = await Genre.findById(req.params.id)
+		if (genre){
+			let movies = await genre.getMovies()
+			res.status(200).json(movies)
+		}
+		else{
+			res.status(404).json({message : 'not found'})
+		}
+	}
+	catch(e){
+		next(e)
+	}	
+})
+
+app.post('/genres/:id/movies', async (req, res, next) => {
+	try{
+		let genre = await Genre.findById(req.params.id)
+		let movie = await Movie.create(req.body)
+        genre.addMovie(movie)
 		res.status(200).json({message : 'created'})
 	}
 	catch(e){
